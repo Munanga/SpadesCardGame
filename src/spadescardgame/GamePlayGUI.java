@@ -7,12 +7,13 @@ import java.awt.event.MouseListener;
 import java.util.Arrays;
 import javax.swing.JOptionPane;
 import javax.swing.JComponent;
-import java.util.ArrayList;
+import java.util.*;
 import javax.swing.ImageIcon;
 import javax.swing.table.DefaultTableModel;
 /**
  *
  * @author Munanga
+ * @author Kyle Smith
  */
 public class GamePlayGUI extends javax.swing.JFrame {
        
@@ -34,20 +35,32 @@ public class GamePlayGUI extends javax.swing.JFrame {
     // round
     private int round = 1;
     String roundString;
+    static int winningcard;
+    //winner of last round will current round
+    static String winningplayer = "";
+    //active suite
+    static String suiteled = "";
+    static String username = "";
     
     //scores in String form
     static String ai1_Score = "0";
     static String ai2_Score = "0";
     static String ai3_Score = "0";
     static String playerScore = "0";
+    
     static boolean cardselect;
-    /**
-     * Creates new form InGamePt1
-     */
+    static boolean round1done = false;
+    static boolean cutattempt;
+    
+    //copies of cards played
+    static Card playercard = new Card(0,0);
+    static Card ai1card = new Card(0,0);
+    static Card ai2card = new Card(0,0);
+    static Card ai3card = new Card(0,0);
     public GamePlayGUI() {
         initComponents();
         deck.shuffle();
-        String username = (String)JOptionPane.showInputDialog(null, "What's your name?");
+        username = (String)JOptionPane.showInputDialog(null, "What's your name?");
         
         // instantiate game players
         player = new Player(username);
@@ -55,7 +68,8 @@ public class GamePlayGUI extends javax.swing.JFrame {
         bob = new AI("Bob",2);
         liz = new AI("Liz",3);
         //jTable1.getTableHeader().set
-        
+        //create new DefaultTableModel model2
+        DefaultTableModel model2 = (DefaultTableModel)jTable2.getModel();
         JOptionPane.showMessageDialog(null, "Welcome " + username);
         jTextPane1.setText(username);  
         
@@ -111,6 +125,9 @@ public class GamePlayGUI extends javax.swing.JFrame {
         jTextField9 = new javax.swing.JTextField();
         jLabel21 = new javax.swing.JLabel();
         jLabel22 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
+        jLabel23 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -327,17 +344,30 @@ public class GamePlayGUI extends javax.swing.JFrame {
         jLabel22.setText("Bid");
         jLayeredPane1.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 560, -1, -1));
 
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "History"
+            }
+        ));
+        jScrollPane3.setViewportView(jTable2);
+
+        jLayeredPane1.add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 410, 90));
+
+        jLabel23.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardbackground.jpg"))); // NOI18N
+        jLayeredPane1.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1100, 610));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1098, Short.MAX_VALUE)
+            .addComponent(jLayeredPane1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 612, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 18, Short.MAX_VALUE))
+            .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 612, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
 
         pack();
@@ -405,35 +435,90 @@ public class GamePlayGUI extends javax.swing.JFrame {
     
     public void gameLoop(){
         
-            MouseListener mouseListener = new MouseAdapter() {
-
-                @Override
-                public void mouseClicked(MouseEvent evt) {
-
-                  String name = ((javax.swing.JLabel)evt.getSource()).getName();
-                  try{
+            MouseListener mouseListener;
+        mouseListener = new MouseAdapter() {
+            //controls who plays the first card of each round(winner of the last round)
+            public String turnswitch(){
+                if(round1done)
+                {
+                    return winningplayer;
+                }
+                //The user will always go first during the first round
+                return username;
+            }
+            //method to keep track of the suite of the first card played of each round
+            public String suiteLed()
+            {
+                if(winningplayer.equals(username))
+                {
+                    suiteled = Integer.toString(playercard.getSuit());
+                }
+                else if(winningplayer.equals("Jane"))
+                {
+                    suiteled = Integer.toString(ai1card.getSuit());
+                }
+                else if(winningplayer.equals("Bob"))
+                {
+                    suiteled = Integer.toString(ai2card.getSuit());
+                }
+                else if(winningplayer.equals("Liz"))
+                {
+                    suiteled = Integer.toString(ai3card.getSuit());
+                }
+                return suiteled;
+            }
+            /*method to keep track of the highest card possible depending on the suite
+            led and just in case the user chooses the hard difficulty*/
+            public Card highestCardPossible()
+            {
+                Card highcard = playercard;
+                if(cutattempt = true || suiteled.equals("Spades"))
+                {
+                    highcard = new Card(0,12);
+                }
+                if(suiteled.equals("Hearts"))
+                {
+                    highcard = new Card(2,12);
+                }
+                else if(suiteled.equals("Diamonds")){
+                    highcard = new Card(1,12);
+                }
+                else if(suiteled.equals("Clubs"))
+                {
+                    highcard = new Card(3,12);
+                }
+                return highcard;
+            }
+            public boolean cutMade(){
+                highestCardPossible();
+            }
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                
+                String name = ((javax.swing.JLabel)evt.getSource()).getName();
+                try{
                     // check jLabel name
                     switch (name) {
-                      case "jLabel1":
-                           
+                        case "jLabel1":
+                            
                             playedCard(0);
                             setJlabelImage(jLabel17,0,0);
                             removePlayedCardFromGUI(jLabel1);
-
-
-    //                        ArrayList<Card> temp = jane.getAICards();
-    //                        for (Card i : temp){
-    //                            System.out.println("ai = " + i.getFaceValue());
-    //                        }
-    //                        
-    //                        ArrayList<Card> temp2 = player.getPlayerCardDeck();
-    //                        for (Card i : temp2){
-    //                            System.out.println("player = " + i.getFaceValue());
-    //                        }
-    //                        
-    //                        
-    //                        System.out.println("|player| = " + player.getPlayerCardDeck().get(0).getFaceValue());
-    //                        System.out.println("|ai| = " + jane.selectCard(0).getFaceValue());
+                            
+                            
+                            //                        ArrayList<Card> temp = jane.getAICards();
+                            //                        for (Card i : temp){
+                            //                            System.out.println("ai = " + i.getFaceValue());
+                            //                        }
+                            //
+                            //                        ArrayList<Card> temp2 = player.getPlayerCardDeck();
+                            //                        for (Card i : temp2){
+                            //                            System.out.println("player = " + i.getFaceValue());
+                            //                        }
+                            //
+                            //
+                            //                        System.out.println("|player| = " + player.getPlayerCardDeck().get(0).getFaceValue());
+                            //                        System.out.println("|ai| = " + jane.selectCard(0).getFaceValue());
 
                             // ai plays
                             //jane
@@ -447,16 +532,20 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(0),jane.selectCard(0),bob.selectCard(0),liz.selectCard(0));
+                            playercard = player.getPlayerCardDeck().get(0);
+                            //store copies of cards
+                            ai1card = jane.selectCard(0);
+                            ai2card = bob.selectCard(0);
+                            ai3card = liz.selectCard(0);
                             
-
                             break;
-                      case "jLabel2":
+                        case "jLabel2":
                             
                             playedCard(1);
                             setJlabelImage(jLabel17,1,0);
                             removePlayedCardFromGUI(jLabel2);
-
-                             // ai plays then
+                            
+                            // ai plays then
                             //jane
                             setJlabelImage(jLabel18,1,1);
                             // bob
@@ -468,17 +557,22 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(1),jane.selectCard(1),bob.selectCard(1),liz.selectCard(1));
+                            playercard = player.getPlayerCardDeck().get(1);
+                            //store copies of cards
+                            ai1card = jane.selectCard(1);
+                            ai2card = bob.selectCard(1);
+                            ai3card = liz.selectCard(1);
                                
                             break;
-                      case "jLabel3":
-                           
+                        case "jLabel3":
+                            
                             playedCard(2);
                             setJlabelImage(jLabel17,2,0);
                             removePlayedCardFromGUI(jLabel3);
-
-
-
-                             // ai plays then
+                            
+                            
+                            
+                            // ai plays then
                             //jane
                             setJlabelImage(jLabel18,2,1);
                             // bob
@@ -490,9 +584,12 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(2),jane.selectCard(2),bob.selectCard(2),liz.selectCard(2));
-                            
+                            //store copies of cards
+                            ai1card = jane.selectCard(2);
+                            ai2card = bob.selectCard(2);
+                            ai3card = liz.selectCard(2);
                             break;
-                      case "jLabel4":
+                        case "jLabel4":
                             
                             playedCard(3);
                             setJlabelImage(jLabel17,3,0);
@@ -509,9 +606,12 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(3),jane.selectCard(3),bob.selectCard(3),liz.selectCard(3));
-                            
+                            //store copies of cards
+                            ai1card = jane.selectCard(3);
+                            ai2card = bob.selectCard(3);
+                            ai3card = liz.selectCard(3);
                             break;
-                      case "jLabel5":
+                        case "jLabel5":
                             
                             playedCard(4);
                             setJlabelImage(jLabel17,4,0);
@@ -528,9 +628,12 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(4),jane.selectCard(4),bob.selectCard(4),liz.selectCard(4));
-                          
+                            //store copies of cards
+                            ai1card = jane.selectCard(4);
+                            ai2card = bob.selectCard(4);
+                            ai3card = liz.selectCard(4);
                             break;
-                      case "jLabel6":
+                        case "jLabel6":
                             
                             playedCard(5);
                             setJlabelImage(jLabel17,5,0);
@@ -547,9 +650,12 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(5),jane.selectCard(5),bob.selectCard(5),liz.selectCard(5));
-                          
+                            //store copies of cards
+                            ai1card = jane.selectCard(5);
+                            ai2card = bob.selectCard(5);
+                            ai3card = liz.selectCard(5);
                             break;
-                      case "jLabel7":
+                        case "jLabel7":
                             
                             playedCard(6);
                             setJlabelImage(jLabel17,6,0);
@@ -566,9 +672,12 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(6),jane.selectCard(6),bob.selectCard(6),liz.selectCard(6));
-                          
+                            //store copies of cards
+                            ai1card = jane.selectCard(6);
+                            ai2card = bob.selectCard(6);
+                            ai3card = liz.selectCard(6);
                             break;
-                      case "jLabel8":
+                        case "jLabel8":
                             
                             playedCard(7);
                             setJlabelImage(jLabel17,7,0);
@@ -585,9 +694,12 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(7),jane.selectCard(7),bob.selectCard(7),liz.selectCard(7));
-                          
+                            //store copies of cards
+                            ai1card = jane.selectCard(7);
+                            ai2card = bob.selectCard(7);
+                            ai3card = liz.selectCard(7);
                             break;
-                      case "jLabel9":
+                        case "jLabel9":
                             
                             playedCard(8);
                             setJlabelImage(jLabel17,8,0);
@@ -604,9 +716,12 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(8),jane.selectCard(8),bob.selectCard(8),liz.selectCard(8));
-                          
+                            //store copies of cards
+                            ai1card = jane.selectCard(8);
+                            ai2card = bob.selectCard(8);
+                            ai3card = liz.selectCard(8);
                             break;
-                      case "jLabel10":
+                        case "jLabel10":
                             
                             playedCard(9);
                             setJlabelImage(jLabel17,9,0);
@@ -623,10 +738,13 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(9),jane.selectCard(9),bob.selectCard(9),liz.selectCard(9));
-                          
+                            //store copies of cards
+                            ai1card = jane.selectCard(9);
+                            ai2card = bob.selectCard(9);
+                            ai3card = liz.selectCard(9);
                             break;
-                      case "jLabel11":
-                           
+                        case "jLabel11":
+                            
                             playedCard(10);
                             setJlabelImage(jLabel17,10,0);
                             removePlayedCardFromGUI(jLabel11);
@@ -641,11 +759,14 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             setTableVisible();
                             
                             // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(2),jane.selectCard(10),bob.selectCard(10),liz.selectCard(10));
-                          
+                            getHandWinner(player.getPlayerCardDeck().get(10),jane.selectCard(10),bob.selectCard(10),liz.selectCard(10));
+                            //store copies of cards
+                            ai1card = jane.selectCard(10);
+                            ai2card = bob.selectCard(10);
+                            ai3card = liz.selectCard(10);
                             break;
-                      case "jLabel12":
-                           
+                        case "jLabel12":
+                            
                             playedCard(11);
                             setJlabelImage(jLabel17,11,0);
                             removePlayedCardFromGUI(jLabel12);
@@ -661,9 +782,12 @@ public class GamePlayGUI extends javax.swing.JFrame {
                             
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(11),jane.selectCard(11),bob.selectCard(11),liz.selectCard(11));
-                          
+                            //store copies of cards
+                            ai1card = jane.selectCard(11);
+                            ai2card = bob.selectCard(11);
+                            ai3card = liz.selectCard(11);
                             break;
-                      case "jLabel13":
+                        case "jLabel13":
                             
                             playedCard(12);
                             setJlabelImage(jLabel17,12,0);
@@ -680,17 +804,20 @@ public class GamePlayGUI extends javax.swing.JFrame {
                            
                             // compare cards
                             getHandWinner(player.getPlayerCardDeck().get(12),jane.selectCard(12),bob.selectCard(12),liz.selectCard(12));
-                          
-                            break; 
-                    }  
-                  }
-                  catch(Exception ie)
-                  {
-                      ie.printStackTrace();
-                  }
+                            //store copies of cards
+                            ai1card = jane.selectCard(12);
+                            ai2card = bob.selectCard(12);
+                            ai3card = liz.selectCard(12);
+                            break;
+                    }
+                    round1done = true;
                 }
-
-            };
+                catch(Exception ie)
+                {
+                    ie.printStackTrace();
+                }
+            } 
+        };
 
             // Add addMouseListener for player cards (jLabels 1 to 13)
             for (javax.swing.JLabel labels : Arrays.asList(jLabel1,jLabel2,jLabel3,jLabel4,jLabel5,jLabel6,jLabel7,jLabel8,jLabel9,jLabel10,jLabel11,jLabel12,jLabel13)) {
@@ -699,41 +826,54 @@ public class GamePlayGUI extends javax.swing.JFrame {
               
        
     }
-    
+    //Add structure to the tables
     public void addRowsToTable(){
-        DefaultTableModel model1 = (DefaultTableModel)jTable1.getModel();   
+        //create new DefaultTableModel model1
+        DefaultTableModel model1 = (DefaultTableModel)jTable1.getModel();
+        //create new DefaultTableModel model2
+        DefaultTableModel model2 = (DefaultTableModel)jTable1.getModel();
         for(int i = 0; i < 2; i++){
             model1.addRow(new Object[]{});
+            model2.addRow(new Object[]{});
         }
     }
     
     
     public void getHandWinner(Card playerCard, Card firstAIplayerCard, Card secondAIplayerCard, Card thirdAIplayerCard){
         
-        int winner = playerCard.getFaceValue();
-        
+        winningcard = playerCard.getFaceValue();
+        winningplayer = username;
+        //playercard = playerCard;
         if(firstAIplayerCard.getFaceValue() > playerCard.getFaceValue()){ 
-            winner = firstAIplayerCard.getFaceValue();
+            winningcard = firstAIplayerCard.getFaceValue();
+            winningplayer = "Jane";
+            //ai1card = firstAIplayerCard;
             if(secondAIplayerCard.getFaceValue() > firstAIplayerCard.getFaceValue()){
-                winner = secondAIplayerCard.getFaceValue();
+                winningcard = secondAIplayerCard.getFaceValue();
+                winningplayer = "Bob";
+                //ai2card = secondAIplayerCard;
                 if(thirdAIplayerCard.getFaceValue() > secondAIplayerCard.getFaceValue()){
-                    winner = thirdAIplayerCard.getFaceValue();    
+                    winningcard = thirdAIplayerCard.getFaceValue();
+                    winningplayer = "Liz";
+                    //ai3card = thirdAIplayerCard;
                 }
             }
         }
-        
-      
         DefaultTableModel model1 = (DefaultTableModel)jTable1.getModel();
+        DefaultTableModel model2 = (DefaultTableModel)jTable1.getModel();
+        model1.setValueAt(username+" played: "+playercard.getFaceValue(),0,0);
+        model1.setValueAt("Jane played: "+ai1card.getFaceValue(),0,1);
+        model1.setValueAt("Bob played: "+ai2card.getFaceValue(),0,2);
+        model1.setValueAt("Liz played: "+ai3card.getFaceValue(),0,3);
         //logic to update scores
-        if (playerCard.getFaceValue() == winner){
+        if (playerCard.getFaceValue() == winningcard){
             
             scores[0] = scores[0] + 1;
             playerScore = Integer.toString(scores[0]);
             model1.setValueAt(scores[0], 0, 0);
-                    
         }
         
-        if(firstAIplayerCard.getFaceValue() == winner){
+        if(firstAIplayerCard.getFaceValue() == winningcard){
             
             scores[1] = scores[1] + 1;
             ai1_Score = Integer.toString(scores[1]);
@@ -741,7 +881,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
             
         }
         
-        if(secondAIplayerCard.getFaceValue() == winner){
+        if(secondAIplayerCard.getFaceValue() == winningcard){
             
             scores[2] = scores[2] + 1;
             ai2_Score = Integer.toString(scores[2]);
@@ -749,7 +889,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
             
             
         }
-        if(thirdAIplayerCard.getFaceValue() == winner){
+        if(thirdAIplayerCard.getFaceValue() == winningcard){
             
             scores[3] = scores[3] + 1;
             ai3_Score = Integer.toString(scores[3]);
@@ -869,6 +1009,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -880,7 +1021,9 @@ public class GamePlayGUI extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField6;
     private javax.swing.JTextField jTextField7;
