@@ -6,23 +6,25 @@
 package spadescardgame;
 import java.util.ArrayList;
 /**
- *
- * @author Munanga
+ * @author kyle Smith
+ * @author Jack Munsaka
  */
 public class Player  {
     
     private String playerName;
-    private Deck deckOfCards = new Deck();
     private ArrayList<Card> playerDeck = new ArrayList<Card>();
-    
+    private int roundsWon;
+    private int score;
 
-    Player(String name){
+    Player(String name, ArrayList<Card> deck){
         this.playerName = name;
+        roundsWon = 0;
+        score = 0;
         
         for(int i = 0; i < 13;i++){
-            playerDeck.add(deckOfCards.getDeck().get(i));
+            playerDeck.add(deck.get(i));
         }
-
+        
     }
     
     
@@ -30,8 +32,25 @@ public class Player  {
         return playerDeck;
     }
     
+    // update player rounds won
+    public void updateRoundsWon(int value){
+       roundsWon = roundsWon + value;
+    }
     
+    // get rounds won
+    public int getRoundsWon(){
+       return roundsWon;
+    }
     
+    // update player score
+    public void updateScore(int value){
+       score = score + value;
+    }
+    
+    // get player score
+    public int getScore(){
+       return score;
+    }
     
     
     

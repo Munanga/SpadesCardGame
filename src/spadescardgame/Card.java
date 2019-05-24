@@ -18,7 +18,8 @@ public class Card {
     private String[] cardValue = {"2", "3", "4", "5",
                                    "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
     
-    
+    private String[] cardValueHard = {"2", "3", "4", "5",
+                                   "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace","ljoker","bjoker"};
     Card(int s, int fv){
         this.suit = s;
         this.faceValue = fv;

@@ -6,25 +6,44 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Arrays;
 import javax.swing.JOptionPane;
-import javax.swing.JComponent;
 import java.util.*;
-import javax.swing.ImageIcon;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.*;
+import javax.swing.border.Border;
+import java.util.Timer;
+
 /**
  *
- * @author Munanga
+ * @author Jack Munsaka
  * @author Kyle Smith
  */
 public class GamePlayGUI extends javax.swing.JFrame {
        
+    // mouse listener
+    private MouseListener mouseListener;
+    
+    // 52 card deck
     private Deck deck = new Deck();
+    
+    // array of scores
     private int [] scores = new int[4];
+    
+    // username
+    static String username = "";
     
     // create game players
     private Player player;
     private AI jane;
     private AI bob;
     private AI liz;
+    
+    // Table for Scores and bids
+    private DefaultTableModel model1;
+    
+    // Table for played cards
+    private DefaultTableModel model2;
+    
+    static int rowIndex = 0;
     
     // check whether human can play 
     private boolean playerTurnToPlay = false;
@@ -35,44 +54,43 @@ public class GamePlayGUI extends javax.swing.JFrame {
     // round
     private int round = 1;
     String roundString;
-    static int winningcard;
-    //winner of last round will current round
-    static String winningplayer = "";
-    //active suite
-    static String suiteled = "";
-    static String username = "";
     
     //scores in String form
     static String ai1_Score = "0";
     static String ai2_Score = "0";
     static String ai3_Score = "0";
     static String playerScore = "0";
-    
-    static boolean cardselect;
-    static boolean round1done = false;
-    static boolean cutattempt;
+
     
     //copies of cards played
-    static Card playercard = new Card(0,0);
-    static Card ai1card = new Card(0,0);
-    static Card ai2card = new Card(0,0);
-    static Card ai3card = new Card(0,0);
+    static Card playercard;
+    static Card ai1card;
+    static Card ai2card;
+    static Card ai3card;
+    
+    
+    
     public GamePlayGUI() {
         initComponents();
         deck.shuffle();
+        setHandsInvisible();
+        
         username = (String)JOptionPane.showInputDialog(null, "What's your name?");
-        
+        while(username.length() == 0){
+            username = (String)JOptionPane.showInputDialog(null, "Please enter your name");
+        }
         // instantiate game players
-        player = new Player(username);
-        jane = new AI("Jane",1);
-        bob = new AI("Bob",2);
-        liz = new AI("Liz",3);
-        //jTable1.getTableHeader().set
-        //create new DefaultTableModel model2
-        DefaultTableModel model2 = (DefaultTableModel)jTable2.getModel();
-        JOptionPane.showMessageDialog(null, "Welcome " + username);
-        jTextPane1.setText(username);  
+        player = new Player(username,deck.getDeck());
+        jane = new AI("Jane",deck.getDeck(),1);
+        bob = new AI("Bob",deck.getDeck(),2);
+        liz = new AI("Liz",deck.getDeck(),3);
         
+        JOptionPane.showMessageDialog(null, "Welcome " + username);
+        jTextField2.setText(username); 
+        
+        //create new table models
+        model1 = (DefaultTableModel)jTable1.getModel();
+        model2 = (DefaultTableModel)jTable2.getModel();
         roundString = Integer.toString(round);
         jTextField9.setText(roundString);
         
@@ -94,8 +112,6 @@ public class GamePlayGUI extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        jTextPane1 = new javax.swing.JTextPane();
         jButton1 = new javax.swing.JButton();
         jTextField1 = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
@@ -124,9 +140,14 @@ public class GamePlayGUI extends javax.swing.JFrame {
         jTextField8 = new javax.swing.JTextField();
         jTextField9 = new javax.swing.JTextField();
         jLabel21 = new javax.swing.JLabel();
-        jLabel22 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTable2 = new javax.swing.JTable();
+        jLabel22 = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
+        jLabel24 = new javax.swing.JLabel();
+        jLabel27 = new javax.swing.JLabel();
+        jButton3 = new javax.swing.JButton();
+        jTextField2 = new javax.swing.JTextField();
         jLabel23 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -166,17 +187,10 @@ public class GamePlayGUI extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jTable1.setRowHeight(26);
+        jTable1.setRowHeight(28);
         jScrollPane1.setViewportView(jTable1);
 
-        jLayeredPane1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(700, 500, 370, 80));
-
-        jTextPane1.setEditable(false);
-        jTextPane1.setBorder(null);
-        jTextPane1.setFont(new java.awt.Font("Verdana", 0, 18)); // NOI18N
-        jScrollPane2.setViewportView(jTextPane1);
-
-        jLayeredPane1.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 510, 150, 30));
+        jLayeredPane1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 510, 370, 80));
 
         jButton1.setText("Deal");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -184,22 +198,31 @@ public class GamePlayGUI extends javax.swing.JFrame {
                 jButton1ActionPerformed(evt);
             }
         });
-        jLayeredPane1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 310, -1, -1));
+        jLayeredPane1.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 340, -1, -1));
 
         jTextField1.setEditable(false);
-        jTextField1.setFont(new java.awt.Font("Verdana", 0, 18)); // NOI18N
+        jTextField1.setFont(new java.awt.Font("Verdana", 1, 24)); // NOI18N
         jTextField1.setText("Round");
         jTextField1.setBorder(null);
+        jTextField1.setOpaque(false);
         jTextField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField1ActionPerformed(evt);
             }
         });
-        jLayeredPane1.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(910, 20, 70, -1));
+        jLayeredPane1.add(jTextField1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, 90, -1));
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
-        jLayeredPane1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1000, 390, -1, -1));
+        jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel1MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jLabel1MouseExited(evt);
+            }
+        });
+        jLayeredPane1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(1000, 380, -1, -1));
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel2.setName("jLabel2"); // NOI18N
@@ -207,44 +230,92 @@ public class GamePlayGUI extends javax.swing.JFrame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel2MouseClicked(evt);
             }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel2MouseEntered(evt);
+            }
         });
-        jLayeredPane1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(920, 390, -1, -1));
+        jLayeredPane1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(920, 380, -1, -1));
 
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel3.setName("jLabel3"); // NOI18N
-        jLayeredPane1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(840, 390, -1, -1));
+        jLabel3.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel3MouseEntered(evt);
+            }
+        });
+        jLayeredPane1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(840, 380, -1, -1));
 
         jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel4.setName("jLabel4"); // NOI18N
-        jLayeredPane1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(760, 390, -1, -1));
+        jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel4MouseEntered(evt);
+            }
+        });
+        jLayeredPane1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(760, 380, -1, -1));
 
         jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel5.setName("jLabel5"); // NOI18N
-        jLayeredPane1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 390, -1, -1));
+        jLabel5.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel5MouseEntered(evt);
+            }
+        });
+        jLayeredPane1.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(680, 380, -1, -1));
 
         jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel6.setName("jLabel6"); // NOI18N
-        jLayeredPane1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 390, -1, -1));
+        jLabel6.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel6MouseEntered(evt);
+            }
+        });
+        jLayeredPane1.add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 380, -1, -1));
 
         jLabel7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel7.setName("jLabel7"); // NOI18N
-        jLayeredPane1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 390, -1, -1));
+        jLabel7.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel7MouseEntered(evt);
+            }
+        });
+        jLayeredPane1.add(jLabel7, new org.netbeans.lib.awtextra.AbsoluteConstraints(520, 380, -1, -1));
 
         jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel8.setName("jLabel8"); // NOI18N
-        jLayeredPane1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 390, -1, -1));
+        jLabel8.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel8MouseEntered(evt);
+            }
+        });
+        jLayeredPane1.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 380, -1, -1));
 
         jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel9.setName("jLabel9"); // NOI18N
-        jLayeredPane1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 390, -1, -1));
+        jLabel9.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel9MouseEntered(evt);
+            }
+        });
+        jLayeredPane1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 380, -1, -1));
 
         jLabel10.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel10.setName("jLabel10"); // NOI18N
-        jLayeredPane1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 390, -1, -1));
+        jLabel10.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel10MouseEntered(evt);
+            }
+        });
+        jLayeredPane1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(280, 380, -1, -1));
 
         jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel11.setName("jLabel11"); // NOI18N
-        jLayeredPane1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 390, -1, -1));
+        jLabel11.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel11MouseEntered(evt);
+            }
+        });
+        jLayeredPane1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 380, -1, -1));
 
         jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel12.setName("jLabel12"); // NOI18N
@@ -252,8 +323,11 @@ public class GamePlayGUI extends javax.swing.JFrame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel12MouseClicked(evt);
             }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel12MouseEntered(evt);
+            }
         });
-        jLayeredPane1.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 390, -1, -1));
+        jLayeredPane1.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 380, -1, -1));
 
         jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLabel13.setName("jLabel13"); // NOI18N
@@ -261,19 +335,23 @@ public class GamePlayGUI extends javax.swing.JFrame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel13MouseClicked(evt);
             }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jLabel13MouseEntered(evt);
+            }
         });
-        jLayeredPane1.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 390, -1, -1));
+        jLayeredPane1.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 380, -1, -1));
 
         jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
-        jLayeredPane1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(980, 180, -1, -1));
+        jLayeredPane1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(910, 190, -1, -1));
 
         jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
-        jLayeredPane1.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 10, -1, -1));
+        jLayeredPane1.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 10, -1, -1));
 
         jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
-        jLayeredPane1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 190, -1, -1));
+        jLayeredPane1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 200, -1, -1));
 
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel1.setOpaque(false);
 
         jLabel17.setName("jLabel17"); // NOI18N
 
@@ -313,57 +391,89 @@ public class GamePlayGUI extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jLayeredPane1.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 130, 350, 240));
+        jLayeredPane1.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 120, 350, 240));
 
         jTextField6.setEditable(false);
-        jTextField6.setFont(new java.awt.Font("Comic Sans MS", 0, 18)); // NOI18N
+        jTextField6.setFont(new java.awt.Font("Comic Sans MS", 1, 24)); // NOI18N
+        jTextField6.setForeground(new java.awt.Color(255, 255, 255));
         jTextField6.setText("Jane");
         jTextField6.setBorder(null);
-        jLayeredPane1.add(jTextField6, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 130, -1, -1));
+        jTextField6.setOpaque(false);
+        jLayeredPane1.add(jTextField6, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 120, -1, -1));
 
         jTextField7.setEditable(false);
-        jTextField7.setFont(new java.awt.Font("Comic Sans MS", 0, 18)); // NOI18N
+        jTextField7.setFont(new java.awt.Font("Comic Sans MS", 1, 24)); // NOI18N
+        jTextField7.setForeground(new java.awt.Color(255, 0, 51));
         jTextField7.setText("Bob");
         jTextField7.setBorder(null);
-        jLayeredPane1.add(jTextField7, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 40, -1, -1));
+        jTextField7.setOpaque(false);
+        jLayeredPane1.add(jTextField7, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 30, -1, -1));
 
         jTextField8.setEditable(false);
-        jTextField8.setFont(new java.awt.Font("Comic Sans MS", 0, 18)); // NOI18N
+        jTextField8.setFont(new java.awt.Font("Comic Sans MS", 1, 24)); // NOI18N
+        jTextField8.setForeground(new java.awt.Color(51, 51, 255));
         jTextField8.setText("Liz");
         jTextField8.setBorder(null);
-        jLayeredPane1.add(jTextField8, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 130, -1, -1));
+        jTextField8.setOpaque(false);
+        jLayeredPane1.add(jTextField8, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 130, -1, -1));
 
         jTextField9.setEditable(false);
-        jTextField9.setFont(new java.awt.Font("Comic Sans MS", 0, 18)); // NOI18N
-        jTextField9.setBorder(null);
-        jLayeredPane1.add(jTextField9, new org.netbeans.lib.awtextra.AbsoluteConstraints(980, 10, 50, 40));
+        jTextField9.setFont(new java.awt.Font("Comic Sans MS", 0, 24)); // NOI18N
+        jTextField9.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jTextField9.setOpaque(false);
+        jLayeredPane1.add(jTextField9, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 10, 40, 40));
 
-        jLabel21.setText("Score");
-        jLayeredPane1.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(640, 530, -1, -1));
-
-        jLabel22.setText("Bid");
-        jLayeredPane1.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 560, -1, -1));
+        jLabel21.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        jLabel21.setText("Scores");
+        jLayeredPane1.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 480, -1, -1));
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "History"
+                "User", "Jane", "Bob", "Liz"
             }
         ));
         jScrollPane3.setViewportView(jTable2);
 
-        jLayeredPane1.add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 410, 90));
+        jLayeredPane1.add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 510, 410, 90));
+
+        jLabel22.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        jLabel22.setText("Played Cards");
+        jLayeredPane1.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 480, -1, -1));
+
+        jLabel25.setIcon(new javax.swing.ImageIcon(getClass().getResource("/FaceImages/Liz.png"))); // NOI18N
+        jLayeredPane1.add(jLabel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 180, -1, 130));
+
+        jLabel24.setIcon(new javax.swing.ImageIcon(getClass().getResource("/FaceImages/Jane.png"))); // NOI18N
+        jLayeredPane1.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 170, -1, -1));
+
+        jLabel27.setIcon(new javax.swing.ImageIcon(getClass().getResource("/FaceImages/Bob.png"))); // NOI18N
+        jLayeredPane1.add(jLabel27, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 10, -1, -1));
+
+        jButton3.setText("Rules");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+        jLayeredPane1.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(1000, 20, -1, -1));
+
+        jTextField2.setEditable(false);
+        jTextField2.setFont(new java.awt.Font("Comic Sans MS", 0, 18)); // NOI18N
+        jTextField2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jLayeredPane1.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 500, 180, 30));
 
         jLabel23.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardbackground.jpg"))); // NOI18N
-        jLayeredPane1.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1100, 610));
+        jLabel23.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jLayeredPane1.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 1110, 610));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLayeredPane1)
+            .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1100, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -377,30 +487,43 @@ public class GamePlayGUI extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField1ActionPerformed
     
-    // temp method to display which card was played
-    public void playedCard(int index){
-        JOptionPane.showMessageDialog(null, "clicked " + player.getPlayerCardDeck().get(index).getSuitString() + player.getPlayerCardDeck().get(index).getSuitNumberString());
-        numberOfCardsLeft--;
-    }
     
     public void removePlayedCardFromGUI(javax.swing.JLabel label){
         label.setVisible(false);
         jLayeredPane1.remove(label);
        
     }
+    
     public void setTableVisible(){
         jLabel17.setVisible(true);
         jLabel18.setVisible(true);
         jLabel19.setVisible(true);
         jLabel20.setVisible(true);
     }
+    
     public void setTableInvisible(){
         jLabel17.setVisible(false);
         jLabel18.setVisible(false);
         jLabel19.setVisible(false);
         jLabel20.setVisible(false);
- 
     }
+    
+    public void setHandsInvisible(){
+        for (javax.swing.JLabel labels : Arrays.asList(jLabel1,jLabel2,jLabel3,jLabel4,jLabel5,
+                                                        jLabel6,jLabel7,jLabel8,jLabel9,jLabel10,
+                                                        jLabel11,jLabel12,jLabel13,jLabel14,jLabel15,jLabel16)) {
+            labels.setVisible(false);
+        }
+    }
+    
+    public void setHandsVisible(){
+        for (javax.swing.JLabel labels : Arrays.asList(jLabel1,jLabel2,jLabel3,jLabel4,jLabel5,
+                                                        jLabel6,jLabel7,jLabel8,jLabel9,jLabel10,
+                                                        jLabel11,jLabel12,jLabel13,jLabel14,jLabel15,jLabel16)) {
+            labels.setVisible(true);
+        }
+    }
+    
     public void setJlabelImage(javax.swing.JLabel label, int index, int playerOrAI){
         
         switch (playerOrAI) {
@@ -415,499 +538,494 @@ public class GamePlayGUI extends javax.swing.JFrame {
                 break;
             case 3:
                 label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/"+liz.selectCard(index).getImage())));
-                break;
-                
+                break;      
         }
         
     }    
     
     public void gameOverCheck(){
-      
-        
-        if(numberOfCardsLeft == 0){
-            JOptionPane.showMessageDialog(null, "Game Over!! \nPlayer score: " + scores[0] + 
-                    "\nJane score: " + scores[1] + 
-                    "\nBob score: " + scores[2] + 
-                    "\nLiz score: " + scores[3]); 
            
+        if(numberOfCardsLeft == 0){
+
+            ResultsGUI results = new ResultsGUI(player,jane,bob,liz);
+            results.setVisible(true);
+            dispose();            
+                    
         }
+        
     }
+   
+    // set the jLabel icon
+    public void ai1playcard(int index){        
+        setJlabelImage(jLabel18,index,1);//jane        
+    }
+    
+    public void ai2playcard(int index){               
+        setJlabelImage(jLabel19,index,2);//Bob
+    }
+    
+    public void ai3playcard(int index){                
+        setJlabelImage(jLabel20,index,3);//liz       
+    }
+    
+    
+    // method for all AI players to play with delays inbetween
+    public void allAIsPlay(int index){
+        inPlay = true;
+        
+        TimerTask firstAIPlays = new TimerTask() {
+            @Override
+            public void run() {
+                ai1playcard(index);
+            }
+        };
+        
+        TimerTask secondAIPlays = new TimerTask() {
+            @Override
+            public void run() {
+                ai2playcard(index);
+            }
+        };
+        
+        TimerTask thirdAIPlays = new TimerTask() {
+            @Override
+            public void run() {
+                ai3playcard(index);
+            }
+        };
+         
+        Timer timer = new Timer();
+        timer.schedule(firstAIPlays,1000);
+        timer.schedule(secondAIPlays,2000);
+        timer.schedule(thirdAIPlays,3000);
+
+    }
+    
+    
+    boolean inPlay = false;
+    
+    // Delay timer for clearing the played table and updating the scores and history there after
+    public void clearCardsAndUpdateScoreDelay(int index){
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                clearPlayedJLabels();
+                getHandWinner(player.getPlayerCardDeck().get(index),jane.selectCard(index),bob.selectCard(index),liz.selectCard(index));            
+                updateCardHistory(index);
+                inPlay = false;
+            }
+        };
+        Timer timer = new Timer();
+        timer.schedule(task,4000);        
+    }
+    
+    // method for clearing the played table icons
+    public void clearPlayedJLabels(){
+        jLabel17.setIcon(null);
+        jLabel18.setIcon(null);
+        jLabel19.setIcon(null);
+        jLabel20.setIcon(null);
+    
+    }
+    
+    
+    
+    public void updateCardHistory(int cardIndex){
+
+        model2.addRow(new Object[]{});
+        
+        playercard = player.getPlayerCardDeck().get(cardIndex);
+        ai1card = jane.selectCard(cardIndex);
+        ai2card = bob.selectCard(cardIndex);
+        ai3card = liz.selectCard(cardIndex);
+        
+        model2.setValueAt(playercard.getSuitString() + playercard.getSuitNumberString(),rowIndex,0);
+        model2.setValueAt(ai1card.getSuitString() + ai1card.getSuitNumberString(),rowIndex,1);
+        model2.setValueAt(ai2card.getSuitString() + ai2card.getSuitNumberString(),rowIndex,2);
+        model2.setValueAt(ai3card.getSuitString() + ai3card.getSuitNumberString(),rowIndex,3);
+        
+        rowIndex++;
+            
+    }
+    
+     
+    public void playedCard(int index){
+        setJlabelImage(jLabel17,index,0);
+        numberOfCardsLeft--; 
+    }
+    
+    
+    // allow the user and AI's to play
+    public void play(int index){
+        // player card is played
+        playedCard(index);
+
+        // all AI cards are played
+        allAIsPlay(index);
+
+        // show playing cards
+        setTableVisible();
+
+        // clear cards and update score
+        clearCardsAndUpdateScoreDelay(index);
+    }
+    
     
     public void gameLoop(){
         
-            MouseListener mouseListener;
-        mouseListener = new MouseAdapter() {
-            //controls who plays the first card of each round(winner of the last round)
-            public String turnswitch(){
-                if(round1done)
+            mouseListener = new MouseAdapter() {
+            
+            //method to capture the mouse when it's hovered over a jLabel
+            @Override
+            public void mouseEntered(MouseEvent evt2){
+                
+                String nameOfLabel = ((javax.swing.JLabel)evt2.getSource()).getName();
+                
+                try
                 {
-                    return winningplayer;
+                    Border cardbackgrd = BorderFactory.createLineBorder(Color.BLUE,3);
+
+                    switch(nameOfLabel){  
+                        case "jLabel1":
+                            jLabel1.setBorder(cardbackgrd);
+                            break;
+                        case "jLabel2":
+                            jLabel2.setBorder(cardbackgrd); 
+                            break;
+                        case "jLabel3":                         
+                            jLabel3.setBorder(cardbackgrd);   
+                            break;
+                        case "jLabel4":                         
+                            jLabel4.setBorder(cardbackgrd);
+                            break;
+                        case "jLabel5":
+                            jLabel5.setBorder(cardbackgrd); 
+                            break;
+                        case "jLabel6":
+                            jLabel6.setBorder(cardbackgrd);
+                            break;
+                        case "jLabel7":
+                            jLabel7.setBorder(cardbackgrd);
+                            break;
+                        case "jLabel8":
+                            jLabel8.setBorder(cardbackgrd);
+                            break;
+                        case "jLabel9":                        
+                            jLabel9.setBorder(cardbackgrd);
+                            break;
+                        case "jLabel10":
+                            jLabel10.setBorder(cardbackgrd);
+                            break;
+                        case "jLabel11":
+                            jLabel11.setBorder(cardbackgrd);
+                            break;
+                        case "jLabel12":
+                            jLabel12.setBorder(cardbackgrd);
+                            break;
+                        case "jLabel13":
+                            jLabel13.setBorder(cardbackgrd); 
+                            break;
+                    }
+                }     
+                catch(Exception exception)
+                {
+                  exception.printStackTrace();
                 }
-                //The user will always go first during the first round
-                return username;
+
             }
-            //method to keep track of the suite of the first card played of each round
-            public String suiteLed()
-            {
-                if(winningplayer.equals(username))
+            //method to detect when the mouse leaves a jLabel
+            @Override
+            public void mouseExited(MouseEvent evt3){
+                String sourceName = ((javax.swing.JLabel)evt3.getSource()).getName();
+                try
                 {
-                    suiteled = Integer.toString(playercard.getSuit());
+                    Border cardbackgrd = BorderFactory.createLineBorder(Color.WHITE,0);
+
+                    jLabel1.setBorder(cardbackgrd);
+
+                    jLabel2.setBorder(cardbackgrd);
+
+                    jLabel3.setBorder(cardbackgrd);
+
+                    jLabel4.setBorder(cardbackgrd);
+
+                    jLabel5.setBorder(cardbackgrd);
+
+                    jLabel6.setBorder(cardbackgrd);
+
+                    jLabel7.setBorder(cardbackgrd);
+
+                    jLabel8.setBorder(cardbackgrd);
+
+                    jLabel9.setBorder(cardbackgrd);
+
+                    jLabel10.setBorder(cardbackgrd);
+
+                    jLabel11.setBorder(cardbackgrd);
+
+                    jLabel12.setBorder(cardbackgrd);
+
+                    jLabel13.setBorder(cardbackgrd);
+                    
                 }
-                else if(winningplayer.equals("Jane"))
+                catch(Exception e3)
                 {
-                    suiteled = Integer.toString(ai1card.getSuit());
+                    e3.printStackTrace();
                 }
-                else if(winningplayer.equals("Bob"))
-                {
-                    suiteled = Integer.toString(ai2card.getSuit());
-                }
-                else if(winningplayer.equals("Liz"))
-                {
-                    suiteled = Integer.toString(ai3card.getSuit());
-                }
-                return suiteled;
             }
-            /*method to keep track of the highest card possible depending on the suite
-            led and just in case the user chooses the hard difficulty*/
-            public Card highestCardPossible()
-            {
-                Card highcard = playercard;
-                if(cutattempt = true || suiteled.equals("Spades"))
-                {
-                    highcard = new Card(0,12);
-                }
-                if(suiteled.equals("Hearts"))
-                {
-                    highcard = new Card(2,12);
-                }
-                else if(suiteled.equals("Diamonds")){
-                    highcard = new Card(1,12);
-                }
-                else if(suiteled.equals("Clubs"))
-                {
-                    highcard = new Card(3,12);
-                }
-                return highcard;
-            }
-            public boolean cutMade(){
-                highestCardPossible();
-            }
+            
             @Override
             public void mouseClicked(MouseEvent evt) {
                 
                 String name = ((javax.swing.JLabel)evt.getSource()).getName();
+                
                 try{
-                    // check jLabel name
+
                     switch (name) {
                         case "jLabel1":
-                            
-                            playedCard(0);
-                            setJlabelImage(jLabel17,0,0);
-                            removePlayedCardFromGUI(jLabel1);
-                            
-                            
-                            //                        ArrayList<Card> temp = jane.getAICards();
-                            //                        for (Card i : temp){
-                            //                            System.out.println("ai = " + i.getFaceValue());
-                            //                        }
-                            //
-                            //                        ArrayList<Card> temp2 = player.getPlayerCardDeck();
-                            //                        for (Card i : temp2){
-                            //                            System.out.println("player = " + i.getFaceValue());
-                            //                        }
-                            //
-                            //
-                            //                        System.out.println("|player| = " + player.getPlayerCardDeck().get(0).getFaceValue());
-                            //                        System.out.println("|ai| = " + jane.selectCard(0).getFaceValue());
-
-                            // ai plays
-                            //jane
-                            setJlabelImage(jLabel18,0,1);
-                            // bob
-                            setJlabelImage(jLabel19,0,2);
-                            // liz
-                            setJlabelImage(jLabel20,0,3);
-                           
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(0),jane.selectCard(0),bob.selectCard(0),liz.selectCard(0));
-                            playercard = player.getPlayerCardDeck().get(0);
-                            //store copies of cards
-                            ai1card = jane.selectCard(0);
-                            ai2card = bob.selectCard(0);
-                            ai3card = liz.selectCard(0);
+                           if(inPlay){
+                               JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                           }else{
+                               play(0);
+                               removePlayedCardFromGUI(jLabel1);
+                           }
+                           break;
+                        case "jLabel2": 
+                            if(inPlay){
+                               JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                            }else{
+                                play(1);
+                                removePlayedCardFromGUI(jLabel2);
+                            }
                             
                             break;
-                        case "jLabel2":
-                            
-                            playedCard(1);
-                            setJlabelImage(jLabel17,1,0);
-                            removePlayedCardFromGUI(jLabel2);
-                            
-                            // ai plays then
-                            //jane
-                            setJlabelImage(jLabel18,1,1);
-                            // bob
-                            setJlabelImage(jLabel19,1,2);
-                            // liz
-                            setJlabelImage(jLabel20,1,3);
                            
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(1),jane.selectCard(1),bob.selectCard(1),liz.selectCard(1));
-                            playercard = player.getPlayerCardDeck().get(1);
-                            //store copies of cards
-                            ai1card = jane.selectCard(1);
-                            ai2card = bob.selectCard(1);
-                            ai3card = liz.selectCard(1);
-                               
-                            break;
                         case "jLabel3":
-                            
-                            playedCard(2);
-                            setJlabelImage(jLabel17,2,0);
-                            removePlayedCardFromGUI(jLabel3);
-                            
-                            
-                            
-                            // ai plays then
-                            //jane
-                            setJlabelImage(jLabel18,2,1);
-                            // bob
-                            setJlabelImage(jLabel19,2,2);
-                            // liz
-                            setJlabelImage(jLabel20,2,3);
-                           
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(2),jane.selectCard(2),bob.selectCard(2),liz.selectCard(2));
-                            //store copies of cards
-                            ai1card = jane.selectCard(2);
-                            ai2card = bob.selectCard(2);
-                            ai3card = liz.selectCard(2);
-                            break;
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                             }else{
+                                 play(2);
+                                 removePlayedCardFromGUI(jLabel3);
+                             }
+
+                             break;
+                          
                         case "jLabel4":
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                            }else{
+                                 play(3);
+                                 removePlayedCardFromGUI(jLabel4);
+                            }
                             
-                            playedCard(3);
-                            setJlabelImage(jLabel17,3,0);
-                            removePlayedCardFromGUI(jLabel4);
-                            
-                            //jane
-                            setJlabelImage(jLabel18,3,1);
-                            // bob
-                            setJlabelImage(jLabel19,3,2);
-                            // liz
-                            setJlabelImage(jLabel20,3,3);
+                             break;
                            
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(3),jane.selectCard(3),bob.selectCard(3),liz.selectCard(3));
-                            //store copies of cards
-                            ai1card = jane.selectCard(3);
-                            ai2card = bob.selectCard(3);
-                            ai3card = liz.selectCard(3);
-                            break;
-                        case "jLabel5":
-                            
-                            playedCard(4);
-                            setJlabelImage(jLabel17,4,0);
-                            removePlayedCardFromGUI(jLabel5);
-                            
-                            //jane
-                            setJlabelImage(jLabel18,4,1);
-                            // bob
-                            setJlabelImage(jLabel19,4,2);
-                            // liz
-                            setJlabelImage(jLabel20,4,3);
-                           
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(4),jane.selectCard(4),bob.selectCard(4),liz.selectCard(4));
-                            //store copies of cards
-                            ai1card = jane.selectCard(4);
-                            ai2card = bob.selectCard(4);
-                            ai3card = liz.selectCard(4);
-                            break;
+                        case "jLabel5": 
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                            }else{
+                                 play(4);
+                                 removePlayedCardFromGUI(jLabel5);
+                            }
+                                                                      
+                             break;
+                          
                         case "jLabel6":
+
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                             }else{
+                                 play(5);
+                                 removePlayedCardFromGUI(jLabel6);
+                            }
                             
-                            playedCard(5);
-                            setJlabelImage(jLabel17,5,0);
-                            removePlayedCardFromGUI(jLabel6);
-                            
-                            //jane
-                            setJlabelImage(jLabel18,5,1);
-                            // bob
-                            setJlabelImage(jLabel19,5,2);
-                            // liz
-                            setJlabelImage(jLabel20,5,3);
-                           
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(5),jane.selectCard(5),bob.selectCard(5),liz.selectCard(5));
-                            //store copies of cards
-                            ai1card = jane.selectCard(5);
-                            ai2card = bob.selectCard(5);
-                            ai3card = liz.selectCard(5);
                             break;
+                          
                         case "jLabel7":
+
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                             }else{
+                                 play(6);
+                                 removePlayedCardFromGUI(jLabel7);
+                             }
                             
-                            playedCard(6);
-                            setJlabelImage(jLabel17,6,0);
-                            removePlayedCardFromGUI(jLabel7);
                             
-                            //jane
-                            setJlabelImage(jLabel18,6,1);
-                            // bob
-                            setJlabelImage(jLabel19,6,2);
-                            // liz
-                            setJlabelImage(jLabel20,6,3);
-                            
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(6),jane.selectCard(6),bob.selectCard(6),liz.selectCard(6));
-                            //store copies of cards
-                            ai1card = jane.selectCard(6);
-                            ai2card = bob.selectCard(6);
-                            ai3card = liz.selectCard(6);
                             break;
+                            
                         case "jLabel8":
-                            
-                            playedCard(7);
-                            setJlabelImage(jLabel17,7,0);
-                            removePlayedCardFromGUI(jLabel8);
-                            
-                            //jane
-                            setJlabelImage(jLabel18,7,1);
-                            // bob
-                            setJlabelImage(jLabel19,7,2);
-                            // liz
-                            setJlabelImage(jLabel20,7,3);
-                            
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(7),jane.selectCard(7),bob.selectCard(7),liz.selectCard(7));
-                            //store copies of cards
-                            ai1card = jane.selectCard(7);
-                            ai2card = bob.selectCard(7);
-                            ai3card = liz.selectCard(7);
+
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                             }else{
+                                 play(7);
+                                 removePlayedCardFromGUI(jLabel8);
+                            }
+
                             break;
+                          
                         case "jLabel9":
+   
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                             }else{
+                                 play(8);
+                                 removePlayedCardFromGUI(jLabel9);
+                            }
                             
-                            playedCard(8);
-                            setJlabelImage(jLabel17,8,0);
-                            removePlayedCardFromGUI(jLabel9);
                             
-                            //jane
-                            setJlabelImage(jLabel18,8,1);
-                            // bob
-                            setJlabelImage(jLabel19,8,2);
-                            // liz
-                            setJlabelImage(jLabel20,8,3);
-                            
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(8),jane.selectCard(8),bob.selectCard(8),liz.selectCard(8));
-                            //store copies of cards
-                            ai1card = jane.selectCard(8);
-                            ai2card = bob.selectCard(8);
-                            ai3card = liz.selectCard(8);
                             break;
+                            
                         case "jLabel10":
+
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                            }else{
+                                 play(9);
+                                 removePlayedCardFromGUI(jLabel10);
+                            }
                             
-                            playedCard(9);
-                            setJlabelImage(jLabel17,9,0);
-                            removePlayedCardFromGUI(jLabel10);
-                            
-                            //jane
-                            setJlabelImage(jLabel18,9,1);
-                            // bob
-                            setJlabelImage(jLabel19,9,2);
-                            // liz
-                            setJlabelImage(jLabel20,9,3);
-                            
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(9),jane.selectCard(9),bob.selectCard(9),liz.selectCard(9));
-                            //store copies of cards
-                            ai1card = jane.selectCard(9);
-                            ai2card = bob.selectCard(9);
-                            ai3card = liz.selectCard(9);
                             break;
+                          
                         case "jLabel11":
+
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                            }else{
+                                 play(10);
+                                 removePlayedCardFromGUI(jLabel11);
+                            }
                             
-                            playedCard(10);
-                            setJlabelImage(jLabel17,10,0);
-                            removePlayedCardFromGUI(jLabel11);
                             
-                            //jane
-                            setJlabelImage(jLabel18,10,1);
-                            // bob
-                            setJlabelImage(jLabel19,10,2);
-                            // liz
-                            setJlabelImage(jLabel20,10,3);
-                            
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(10),jane.selectCard(10),bob.selectCard(10),liz.selectCard(10));
-                            //store copies of cards
-                            ai1card = jane.selectCard(10);
-                            ai2card = bob.selectCard(10);
-                            ai3card = liz.selectCard(10);
                             break;
+                          
                         case "jLabel12":
+    
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                            }else{
+                                 play(11);
+                                 removePlayedCardFromGUI(jLabel12);
+                            }
                             
-                            playedCard(11);
-                            setJlabelImage(jLabel17,11,0);
-                            removePlayedCardFromGUI(jLabel12);
-                            
-                            //jane
-                            setJlabelImage(jLabel18,11,1);
-                            // bob
-                            setJlabelImage(jLabel19,11,2);
-                            // liz
-                            setJlabelImage(jLabel20,11,3);
-                            
-                            setTableVisible();
-                            
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(11),jane.selectCard(11),bob.selectCard(11),liz.selectCard(11));
-                            //store copies of cards
-                            ai1card = jane.selectCard(11);
-                            ai2card = bob.selectCard(11);
-                            ai3card = liz.selectCard(11);
                             break;
+
                         case "jLabel13":
-                            
-                            playedCard(12);
-                            setJlabelImage(jLabel17,12,0);
-                            removePlayedCardFromGUI(jLabel13);
-                            
-                            //jane
-                            setJlabelImage(jLabel18,12,1);
-                            // bob
-                            setJlabelImage(jLabel19,12,2);
-                            // liz
-                            setJlabelImage(jLabel20,12,3);
-                           
-                            setTableVisible();
-                           
-                            // compare cards
-                            getHandWinner(player.getPlayerCardDeck().get(12),jane.selectCard(12),bob.selectCard(12),liz.selectCard(12));
-                            //store copies of cards
-                            ai1card = jane.selectCard(12);
-                            ai2card = bob.selectCard(12);
-                            ai3card = liz.selectCard(12);
+
+                            if(inPlay){
+                                 JOptionPane.showMessageDialog(null, "please wait while all players have played");
+                            }else{
+                                 play(12);
+                                 removePlayedCardFromGUI(jLabel13);
+                            }
+                                                       
                             break;
                     }
-                    round1done = true;
+                       
+                      
                 }
                 catch(Exception ie)
                 {
                     ie.printStackTrace();
                 }
             } 
-        };
+            };
 
             // Add addMouseListener for player cards (jLabels 1 to 13)
-            for (javax.swing.JLabel labels : Arrays.asList(jLabel1,jLabel2,jLabel3,jLabel4,jLabel5,jLabel6,jLabel7,jLabel8,jLabel9,jLabel10,jLabel11,jLabel12,jLabel13)) {
-                labels.addMouseListener(mouseListener);
-            }
+            addListenerToAll();
               
        
     }
-    //Add structure to the tables
-    public void addRowsToTable(){
-        //create new DefaultTableModel model1
-        DefaultTableModel model1 = (DefaultTableModel)jTable1.getModel();
-        //create new DefaultTableModel model2
-        DefaultTableModel model2 = (DefaultTableModel)jTable1.getModel();
-        for(int i = 0; i < 2; i++){
-            model1.addRow(new Object[]{});
-            model2.addRow(new Object[]{});
+    
+    public void addListenerToAll(){
+        for (javax.swing.JLabel labels : Arrays.asList(jLabel1,jLabel2,jLabel3,jLabel4,jLabel5,jLabel6,jLabel7,jLabel8,jLabel9,jLabel10,jLabel11,jLabel12,jLabel13)) {
+                labels.addMouseListener(mouseListener);
         }
     }
     
-    
-    public void getHandWinner(Card playerCard, Card firstAIplayerCard, Card secondAIplayerCard, Card thirdAIplayerCard){
+    //Add structure to the tables
+    public void addRowsToTable(){
         
-        winningcard = playerCard.getFaceValue();
-        winningplayer = username;
-        //playercard = playerCard;
-        if(firstAIplayerCard.getFaceValue() > playerCard.getFaceValue()){ 
-            winningcard = firstAIplayerCard.getFaceValue();
-            winningplayer = "Jane";
-            //ai1card = firstAIplayerCard;
-            if(secondAIplayerCard.getFaceValue() > firstAIplayerCard.getFaceValue()){
-                winningcard = secondAIplayerCard.getFaceValue();
-                winningplayer = "Bob";
-                //ai2card = secondAIplayerCard;
-                if(thirdAIplayerCard.getFaceValue() > secondAIplayerCard.getFaceValue()){
-                    winningcard = thirdAIplayerCard.getFaceValue();
-                    winningplayer = "Liz";
-                    //ai3card = thirdAIplayerCard;
-                }
+        //create new DefaultTableModel model1
+        DefaultTableModel model1 = (DefaultTableModel)jTable1.getModel();
+        
+        //create new DefaultTableModel model2
+        DefaultTableModel model2 = (DefaultTableModel)jTable2.getModel();
+        
+        for(int i = 0; i < 2; i++){
+            model1.addRow(new Object[]{});
+        }
+    }
+    
+    public int getHighestCard(int []cardsArray, int highest){
+        int numberOfHighestCards = 0;
+               
+        for(int i = 0; i < cardsArray.length;i++){
+            if(cardsArray[i] == highest){
+                numberOfHighestCards++;
             }
         }
-        DefaultTableModel model1 = (DefaultTableModel)jTable1.getModel();
-        DefaultTableModel model2 = (DefaultTableModel)jTable1.getModel();
-        model1.setValueAt(username+" played: "+playercard.getFaceValue(),0,0);
-        model1.setValueAt("Jane played: "+ai1card.getFaceValue(),0,1);
-        model1.setValueAt("Bob played: "+ai2card.getFaceValue(),0,2);
-        model1.setValueAt("Liz played: "+ai3card.getFaceValue(),0,3);
+        return numberOfHighestCards;
+    }
+    
+    // Determine hand winner by checking the highest played card(s) and update the winners score
+    public void getHandWinner(Card playerCard, Card firstAIplayerCard, Card secondAIplayerCard, Card thirdAIplayerCard)
+    {
+        
+        int playerNumberValue = playerCard.getFaceValue();
+        int janeNumberValue = firstAIplayerCard.getFaceValue();
+        int bobNumberValue = secondAIplayerCard.getFaceValue();
+        int lizNumberValue = thirdAIplayerCard.getFaceValue();
+        
+        int highest = Math.max(Math.max(playerNumberValue,janeNumberValue),Math.max(bobNumberValue,lizNumberValue));
+              
+        int [] playedCardsArray = {playerNumberValue,janeNumberValue,bobNumberValue,lizNumberValue};
+        
+        int scoreToAdd = 2;
+        if(getHighestCard(playedCardsArray,highest) > 1){
+            scoreToAdd--;
+        }
+        
+        
         //logic to update scores
-        if (playerCard.getFaceValue() == winningcard){
-            
-            scores[0] = scores[0] + 1;
-            playerScore = Integer.toString(scores[0]);
-            model1.setValueAt(scores[0], 0, 0);
+        if (playerNumberValue == highest){
+            player.updateScore(scoreToAdd); 
+            player.updateRoundsWon(1);
+            playerScore = Integer.toString(player.getScore());
+            model1.setValueAt(player.getScore(), 0, 0);
         }
         
-        if(firstAIplayerCard.getFaceValue() == winningcard){
-            
-            scores[1] = scores[1] + 1;
-            ai1_Score = Integer.toString(scores[1]);
-            model1.setValueAt(scores[1], 0, 1);           
-            
+        if(janeNumberValue == highest){        
+            jane.updateScore(scoreToAdd);
+            jane.updateRoundsWon(1);
+            ai1_Score = Integer.toString(jane.getScore());
+            model1.setValueAt(jane.getScore(), 0, 1);                
         }
         
-        if(secondAIplayerCard.getFaceValue() == winningcard){
-            
-            scores[2] = scores[2] + 1;
-            ai2_Score = Integer.toString(scores[2]);
-            model1.setValueAt(scores[2], 0, 2);
-            
-            
+        if(bobNumberValue == highest){
+            bob.updateScore(scoreToAdd);
+            bob.updateRoundsWon(1);
+            ai2_Score = Integer.toString(bob.getScore());
+            model1.setValueAt(bob.getScore(), 0, 2);                        
         }
-        if(thirdAIplayerCard.getFaceValue() == winningcard){
-            
-            scores[3] = scores[3] + 1;
-            ai3_Score = Integer.toString(scores[3]);
-            model1.setValueAt(scores[3], 0, 3);
-            
+        
+        if(lizNumberValue == highest){
+            liz.updateScore(scoreToAdd);
+            liz.updateRoundsWon(1);
+            ai3_Score = Integer.toString(liz.getScore());
+            model1.setValueAt(liz.getScore(), 0, 3);            
         }
         
         gameOverCheck();
-        round++;
+        
+        if(round < 13){
+            round++;
+        }
+        
         String a = Integer.toString(round);
         jTextField9.setText(a);
     }
     
-       
-    public void AI_playCard(){
-        
-    
-    }
     
     
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -917,8 +1035,9 @@ public class GamePlayGUI extends javax.swing.JFrame {
         for(int i = 0; i < 13; i++){
             playerCardJLabelArray[i].setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/"+ player.getPlayerCardDeck().get(i).getImage())));           
         }
-       
-        //getPlayerBid();
+         
+        setHandsVisible();
+        
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -936,6 +1055,68 @@ public class GamePlayGUI extends javax.swing.JFrame {
     private void jLabel2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseClicked
         // TODO add your handling code here:
     }//GEN-LAST:event_jLabel2MouseClicked
+
+    private void jLabel13MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel13MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel13MouseEntered
+
+    private void jLabel12MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel12MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel12MouseEntered
+
+    private void jLabel11MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel11MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel11MouseEntered
+
+    private void jLabel10MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel10MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel10MouseEntered
+
+    private void jLabel9MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel9MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel9MouseEntered
+
+    private void jLabel8MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel8MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel8MouseEntered
+
+    private void jLabel7MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel7MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel7MouseEntered
+
+    private void jLabel6MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel6MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel6MouseEntered
+
+    private void jLabel5MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel5MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel5MouseEntered
+
+    private void jLabel4MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel4MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel4MouseEntered
+
+    private void jLabel3MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel3MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel3MouseEntered
+
+    private void jLabel2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel2MouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel2MouseEntered
+
+    private void jLabel1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseEntered
+        
+    }//GEN-LAST:event_jLabel1MouseEntered
+
+    private void jLabel1MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseExited
+     
+    }//GEN-LAST:event_jLabel1MouseExited
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        RulesGUI rules = new RulesGUI();
+        rules.setVisible(true);
+        
+    }//GEN-LAST:event_jButton3ActionPerformed
     
     private void getPlayerBid(){
         String bidpickup = (String)JOptionPane.showInputDialog(null, "Please enter your Bid: ");
@@ -994,6 +1175,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1010,6 +1192,9 @@ public class GamePlayGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1020,15 +1205,14 @@ public class GamePlayGUI extends javax.swing.JFrame {
     private javax.swing.JLayeredPane jLayeredPane1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField6;
     private javax.swing.JTextField jTextField7;
     private javax.swing.JTextField jTextField8;
     private javax.swing.JTextField jTextField9;
-    private javax.swing.JTextPane jTextPane1;
     // End of variables declaration//GEN-END:variables
 }

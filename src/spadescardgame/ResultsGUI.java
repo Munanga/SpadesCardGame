@@ -1,5 +1,6 @@
 package spadescardgame;
-import javax.swing.JOptionPane;
+
+import javax.swing.table.DefaultTableModel;
 /**
  *
  * @author User
@@ -9,9 +10,28 @@ public class ResultsGUI extends javax.swing.JFrame {
     /**
      * Creates new form Results
      */
-    public ResultsGUI() {
+    private DefaultTableModel resultsTable;
+    
+    public ResultsGUI(Player player,AI jane, AI bob,AI liz) {
         initComponents();
-        JOptionPane.showMessageDialog(null,"A false play has been detected! Please play a different card.");
+        resultsTable = (DefaultTableModel)jTable2.getModel();
+        
+        // rounds won
+        resultsTable.setValueAt(player.getRoundsWon(), 0, 0); 
+        resultsTable.setValueAt(jane.getRoundsWon(), 0, 1);
+        resultsTable.setValueAt(bob.getRoundsWon(), 0, 2);
+        resultsTable.setValueAt(liz.getRoundsWon(), 0, 3);
+
+        // scores
+        resultsTable.setValueAt(player.getScore(), 1, 0);
+        resultsTable.setValueAt(jane.getScore(), 1, 1);
+        resultsTable.setValueAt(bob.getScore(), 1, 2);
+        resultsTable.setValueAt(liz.getScore(), 1, 3);
+        
+    }
+
+    private ResultsGUI() {
+        initComponents();
     }
 
     /**
@@ -29,7 +49,6 @@ public class ResultsGUI extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable2 = new javax.swing.JTable();
         jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
@@ -49,32 +68,30 @@ public class ResultsGUI extends javax.swing.JFrame {
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
-                {null, null, null, null},
                 {null, null, null, null}
             },
             new String [] {
-                "You", "CPU1", "CPU2", "CPU3"
+                "You", "Jane", "Bob", "Liz"
             }
         ));
-        jTable2.setRowHeight(26);
+        jTable2.setRowHeight(27);
         jScrollPane2.setViewportView(jTable2);
 
-        getContentPane().add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 180, 240, 110));
+        getContentPane().add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 180, 250, 80));
 
-        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel4.setForeground(new java.awt.Color(0, 51, 204));
+        jLabel4.setBackground(new java.awt.Color(51, 51, 51));
+        jLabel4.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(0, 153, 0));
         jLabel4.setText("Rounds Won");
-        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 210, -1, -1));
+        jLabel4.setOpaque(true);
+        getContentPane().add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(100, 210, -1, -1));
 
-        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel5.setForeground(new java.awt.Color(0, 51, 153));
-        jLabel5.setText("Bid");
-        getContentPane().add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 230, 40, 20));
-
-        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel1.setForeground(new java.awt.Color(0, 51, 204));
+        jLabel1.setBackground(new java.awt.Color(0, 51, 51));
+        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(51, 153, 0));
         jLabel1.setText("Total Score");
-        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 260, -1, -1));
+        jLabel1.setOpaque(true);
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(110, 240, -1, -1));
 
         jLabel7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(0, 0, 255));
@@ -100,7 +117,7 @@ public class ResultsGUI extends javax.swing.JFrame {
                 jButton2ActionPerformed(evt);
             }
         });
-        getContentPane().add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 390, -1, -1));
+        getContentPane().add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 390, -1, -1));
 
         jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/R2.png"))); // NOI18N
         getContentPane().add(jLabel6, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 712, -1));
@@ -162,7 +179,6 @@ public class ResultsGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;

@@ -6,8 +6,8 @@
 package spadescardgame;
 
 /**
- *
- * @author User
+ * @author Kyle Smith
+ * @author Jack Munsaka
  */
 public class StartMenuGUI extends javax.swing.JFrame {
 
@@ -67,9 +67,10 @@ public class StartMenuGUI extends javax.swing.JFrame {
         });
         jLayeredPane1.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 180, 60, -1));
 
-        jLabel3.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel3.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(255, 255, 0));
         jLabel3.setText("Lets Play Spades!!");
-        jLayeredPane1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(210, 50, 180, 40));
+        jLayeredPane1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 50, 170, 40));
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/starting.jpg"))); // NOI18N
         jLayeredPane1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 540, 330));
@@ -89,13 +90,13 @@ public class StartMenuGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        Rules1GUI rgui = new Rules1GUI();
-        rgui.setVisible(true);
-        dispose();
+        RulesGUI rules = new RulesGUI();
+        rules.setVisible(true);
+        
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        difficultyGUI dgui = new difficultyGUI();
+        GamePlayGUI dgui = new GamePlayGUI();
         dgui.setVisible(true);
         dispose();
     }//GEN-LAST:event_jButton2ActionPerformed

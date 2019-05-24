@@ -22,13 +22,8 @@ public class Deck {
                 Card card = new Card(i,j);
                 deckOfCards.add(card);
             }
-        }
-        
-        // shuffle all cards 
-        shuffle();
-        
+        }               
     }
-   
     
     
     public ArrayList<Card> getDeck(){
@@ -39,8 +34,7 @@ public class Deck {
     public void shuffle(){
         Collections.shuffle(deckOfCards); 
     }
-    
-    
+        
     
     public void printAllCards(){
         for(Card c: deckOfCards){
