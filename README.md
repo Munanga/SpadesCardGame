@@ -3,17 +3,17 @@ A custom version of the spades card game. Software Engineering II project by Mun
 
 The main menu
 ![alt text](https://raw.githubusercontent.com/Munanga/SpadesCardGame/master/readmePics/menu.JPG)
-<br />
+<br/>
 
 The rules
 ![alt text](https://raw.githubusercontent.com/Munanga/SpadesCardGame/master/readmePics/rules.JPG)
-<br />
+<br/>
 
 The gameplay
 ![alt text](https://raw.githubusercontent.com/Munanga/SpadesCardGame/master/readmePics/gameplay.JPG)
-<br />
+<br/>
 
 The results 
 ![alt text](https://raw.githubusercontent.com/Munanga/SpadesCardGame/master/readmePics/end.JPG)
-<br />
+<br/>
 
