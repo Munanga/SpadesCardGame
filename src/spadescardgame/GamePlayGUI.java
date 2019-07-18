@@ -148,6 +148,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
         jLabel27 = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
         jTextField2 = new javax.swing.JTextField();
+        jLabel26 = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -164,6 +165,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
+        jTable1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -176,7 +178,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
                 java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
-                false, true, false, true
+                false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -190,7 +192,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
         jTable1.setRowHeight(28);
         jScrollPane1.setViewportView(jTable1);
 
-        jLayeredPane1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 510, 370, 80));
+        jLayeredPane1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 20, 370, 80));
 
         jButton1.setText("Deal");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -202,6 +204,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
 
         jTextField1.setEditable(false);
         jTextField1.setFont(new java.awt.Font("Verdana", 1, 24)); // NOI18N
+        jTextField1.setForeground(new java.awt.Color(255, 255, 255));
         jTextField1.setText("Round");
         jTextField1.setBorder(null);
         jTextField1.setOpaque(false);
@@ -342,10 +345,10 @@ public class GamePlayGUI extends javax.swing.JFrame {
         jLayeredPane1.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 380, -1, -1));
 
         jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
-        jLayeredPane1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(910, 190, -1, -1));
+        jLayeredPane1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(830, 200, -1, -1));
 
         jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
-        jLayeredPane1.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(600, 10, -1, -1));
+        jLayeredPane1.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(560, 10, -1, -1));
 
         jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardpics/b1fv.png"))); // NOI18N
         jLayeredPane1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 200, -1, -1));
@@ -391,7 +394,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jLayeredPane1.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 120, 350, 240));
+        jLayeredPane1.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 120, 350, 240));
 
         jTextField6.setEditable(false);
         jTextField6.setFont(new java.awt.Font("Comic Sans MS", 1, 24)); // NOI18N
@@ -399,7 +402,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
         jTextField6.setText("Jane");
         jTextField6.setBorder(null);
         jTextField6.setOpaque(false);
-        jLayeredPane1.add(jTextField6, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 120, -1, -1));
+        jLayeredPane1.add(jTextField6, new org.netbeans.lib.awtextra.AbsoluteConstraints(930, 130, -1, -1));
 
         jTextField7.setEditable(false);
         jTextField7.setFont(new java.awt.Font("Comic Sans MS", 1, 24)); // NOI18N
@@ -407,7 +410,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
         jTextField7.setText("Bob");
         jTextField7.setBorder(null);
         jTextField7.setOpaque(false);
-        jLayeredPane1.add(jTextField7, new org.netbeans.lib.awtextra.AbsoluteConstraints(440, 30, -1, -1));
+        jLayeredPane1.add(jTextField7, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 30, -1, -1));
 
         jTextField8.setEditable(false);
         jTextField8.setFont(new java.awt.Font("Comic Sans MS", 1, 24)); // NOI18N
@@ -421,11 +424,12 @@ public class GamePlayGUI extends javax.swing.JFrame {
         jTextField9.setFont(new java.awt.Font("Comic Sans MS", 0, 24)); // NOI18N
         jTextField9.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jTextField9.setOpaque(false);
-        jLayeredPane1.add(jTextField9, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 10, 40, 40));
+        jLayeredPane1.add(jTextField9, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 10, 40, 40));
 
-        jLabel21.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        jLabel21.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel21.setForeground(new java.awt.Color(255, 255, 255));
         jLabel21.setText("Scores");
-        jLayeredPane1.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(790, 480, -1, -1));
+        jLayeredPane1.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 50, -1, -1));
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -437,20 +441,20 @@ public class GamePlayGUI extends javax.swing.JFrame {
         ));
         jScrollPane3.setViewportView(jTable2);
 
-        jLayeredPane1.add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 510, 410, 90));
+        jLayeredPane1.add(jScrollPane3, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 510, 410, 90));
 
         jLabel22.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         jLabel22.setText("Played Cards");
-        jLayeredPane1.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 480, -1, -1));
+        jLayeredPane1.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 480, -1, -1));
 
         jLabel25.setIcon(new javax.swing.ImageIcon(getClass().getResource("/FaceImages/Liz.png"))); // NOI18N
         jLayeredPane1.add(jLabel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 180, -1, 130));
 
         jLabel24.setIcon(new javax.swing.ImageIcon(getClass().getResource("/FaceImages/Jane.png"))); // NOI18N
-        jLayeredPane1.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 170, -1, -1));
+        jLayeredPane1.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(920, 180, -1, -1));
 
         jLabel27.setIcon(new javax.swing.ImageIcon(getClass().getResource("/FaceImages/Bob.png"))); // NOI18N
-        jLayeredPane1.add(jLabel27, new org.netbeans.lib.awtextra.AbsoluteConstraints(490, 10, -1, -1));
+        jLayeredPane1.add(jLabel27, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 10, -1, -1));
 
         jButton3.setText("Rules");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -458,12 +462,18 @@ public class GamePlayGUI extends javax.swing.JFrame {
                 jButton3ActionPerformed(evt);
             }
         });
-        jLayeredPane1.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(1000, 20, -1, -1));
+        jLayeredPane1.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(1030, 120, -1, -1));
 
         jTextField2.setEditable(false);
         jTextField2.setFont(new java.awt.Font("Comic Sans MS", 0, 18)); // NOI18N
-        jTextField2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jTextField2.setForeground(new java.awt.Color(102, 51, 255));
+        jTextField2.setBorder(new javax.swing.border.MatteBorder(null));
         jLayeredPane1.add(jTextField2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 500, 180, 30));
+
+        jLabel26.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabel26.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel26.setText("Hands");
+        jLayeredPane1.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(660, 80, -1, -1));
 
         jLabel23.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spadescardgame/Images/cardbackground.jpg"))); // NOI18N
         jLabel23.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -473,7 +483,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1100, Short.MAX_VALUE)
+            .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1112, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -946,10 +956,10 @@ public class GamePlayGUI extends javax.swing.JFrame {
     //Add structure to the tables
     public void addRowsToTable(){
         
-        //create new DefaultTableModel model1
+        //create new TableModel model1
         DefaultTableModel model1 = (DefaultTableModel)jTable1.getModel();
         
-        //create new DefaultTableModel model2
+        //create new TableModel model2
         DefaultTableModel model2 = (DefaultTableModel)jTable2.getModel();
         
         for(int i = 0; i < 2; i++){
@@ -993,27 +1003,31 @@ public class GamePlayGUI extends javax.swing.JFrame {
             player.updateRoundsWon(1);
             playerScore = Integer.toString(player.getScore());
             model1.setValueAt(player.getScore(), 0, 0);
+            model1.setValueAt(player.getRoundsWon(),1,0);
         }
         
         if(janeNumberValue == highest){        
             jane.updateScore(scoreToAdd);
             jane.updateRoundsWon(1);
             ai1_Score = Integer.toString(jane.getScore());
-            model1.setValueAt(jane.getScore(), 0, 1);                
+            model1.setValueAt(jane.getScore(), 0, 1); 
+            model1.setValueAt(jane.getRoundsWon(), 1, 1); 
         }
         
         if(bobNumberValue == highest){
             bob.updateScore(scoreToAdd);
             bob.updateRoundsWon(1);
             ai2_Score = Integer.toString(bob.getScore());
-            model1.setValueAt(bob.getScore(), 0, 2);                        
+            model1.setValueAt(bob.getScore(), 0, 2);
+            model1.setValueAt(bob.getRoundsWon(), 1, 2);
         }
         
         if(lizNumberValue == highest){
             liz.updateScore(scoreToAdd);
             liz.updateRoundsWon(1);
             ai3_Score = Integer.toString(liz.getScore());
-            model1.setValueAt(liz.getScore(), 0, 3);            
+            model1.setValueAt(liz.getScore(), 0, 3);  
+            model1.setValueAt(liz.getRoundsWon(), 1, 3); 
         }
         
         gameOverCheck();
@@ -1194,6 +1208,7 @@ public class GamePlayGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
